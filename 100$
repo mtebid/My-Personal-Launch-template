@@ -1,0 +1,162 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: This tamplete creats VPC one private subnet, one public subnet with ec2 in each and with the security group and  application load balnacer
+
+#Metadata:
+  
+Parameters:
+  VpcCIDR:
+    Default: 10.0.0.0/16
+    Description: Enter Ip Range for this VPC
+    Type: String
+
+  PublicSubnetCIDR:
+    Default: 10.0.0.0/24
+    Description: Enter Ip Range for the Public subnet
+    Type: String
+
+  PrivateSubnetCIDR:
+    Default: 10.0.1.0/24
+    Description: Enter Ip Range for the private subnet
+    Type: String
+
+  SSHLocation:
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})\'
+    AllowedValues: Must be an IP of the form x.x.x.x/x
+    Default: 0.0.0.0/0
+    Description: IP address allow to ssh the webserver
+    MaxLength: '18'
+    MinLength: '9'
+    Type: string
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref !Ref VpcCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Instancetenancy: default
+      Tags: 
+        - Key: Name
+          Value: production-VPC
+
+  InternetGateway
+    Type: AWS::EC2::NatGateway
+    Properties: 
+      Tags:
+        - key: Name
+          Name: Production IGW
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: Ref VPC 
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetCIDR
+      AvailabilityZone: us-east-1a
+      MapPublicIpOnlaunch: true
+      Tags:
+        - Key: Name
+          Value: production PublicSubnet
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Production Public-RT
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayToInternet
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+
+  PublicSupnetRouteTableAssociation:
+    Type: AWS::EC2::GatewayRouteTableAssociation
+    Properties: 
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet
+
+  PrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetCIDR
+      AvailabilityZone: us-east-1b
+      MapPublicIpOnlaunch: fales
+      Tags:
+        - Key: Name
+          Value: production-PrivateSubnet
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http/https on posr 80/443
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+    SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: Application LB Security Group
+
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SSH Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref SSHLocation
+      Tags:
+        - Key: Name
+          Value: SSH Security Group
+
+  WebserverSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http/https via port 80/443 downd to load balancer
+      VpcId: !Ref VPC
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref SSHLocation
+      Tags:
+        - Key: Name
+          Value: WebserverSecurityGroup
+
+
+
+  
+#Outputs:

@@ -1,0 +1,20 @@
+What Is Infrastructure as Code?
+The cloud gives us the ability to create our environments quickly, but the problem that arises is how to configure and manage the environments. Manually updating from the console may be acceptable for a small organization in a single region, but what if you have to create and maintain environments in multiple regions? Not only is it an inefficient use of time to create and maintain everything, but it’s also error-prone.
+
+Imagine that you are asked to create an environment in a single Region. Not really a big deal and you are able to complete the task with relative ease. Now you need to do the exact same thing for 5 more Regions. Not only that, once you have completed the excruciatingly repetitive task, your leadership asks you to make a change that then needs to be applied to all Regions. This example is inefficiency at its finest.
+
+Think about infrastructure as code as a scalable blueprint for your environment. It allows you to provision and configure your environments in a reliable and safe way. By using code to deploy your infrastructure you gain the ability to use the same tools as developers such as version control, testing, code reviews, and CI/CD.
+
+What is AWS CloudFormation?
+CloudFormation is an AWS Infrastructure as Code service that allows you to create Templates to provision AWS Infrastructure. The Templates are written in JSON or YAML and the service is free, but you have to pay for any provisioned infrastructure. The structure of the Template includes Description, Metadata, Parameters, Mappings, Conditions, Transform, Resources, and Outputs. Only the Resources section is required, although you will most likely be using others when creating complex Templates.
+
+I recommend watching this excerpt from one of the CloudFromation courses I’m currently taking: How to Code Any AWS CloudFormation. This tutorial will show you the steps to create your own CloudFromation template.
+
+Project Requirements
+The title may be a bit misleading as this was not my FIRST CloudFormation template, but it was my first complex CloudFormation template. While going through several online courses, I created simple templates to create S3 buckets or to spin up a single EC2 instance with security group. I wanted to create a CloudFormation template that would be more challenging, so I decided to create requirements for this project before reviewing any documentation to make sure I wasn’t cherry-picking the easy stuff.
+
+My Requirements were the following:
+
+A VPC with 3 Availability Zones with public and private subnets.
+An Auto Scaling group with an Apache Web Server.
+An Application Load Balancer connected to the Auto Scaling group.

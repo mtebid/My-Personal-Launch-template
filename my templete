@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: This tamplete creats VPC one private subnet, one public subnet with ec2 in each and with the security group and  application load balnacer
+
+Metadata:
+  
+Parameters:
+  VpcCIDR:
+    Default: 10.0.0.0/16
+    Description: Enter Ip Range for this VPC
+    Type: String
+
+  PublicSubnetCIDR:
+    Default: 10.0.0.0/24
+    Description: Enter Ip Range for the Public subnet
+    Type: String
+
+  PrivateSubnetCIDR:
+    Default: 10.0.1.0/24
+    Description: Enter Ip Range for the private subnet
+    Type: String
+
+  SSHLocation
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,3})'
+    AllowedValues: Must be an IP of the form x.x.x.x/x
+    Default: 0.0.0.0/0
+    Description: IP address allow to ssh the webserver
+    MaxLength: '18'
+    MinLength: '9'
+    Type: string
+
+
+
+
+   
+
+
+  
+Resources:
+  
+Outputs:
